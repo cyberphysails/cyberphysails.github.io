@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><meta charset="utf-8"><meta name="generator" content="Hugo 0.66.0" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="supported-color-schemes" content="light dark"><title>Centos8 安装 MySQL8 记录&nbsp;&ndash;&nbsp;Physalis</title><link rel="stylesheet" href="/css/core.min.31d6612d2e37f301ac014f5b9726ff1aa63c2d7e5063d440016b9254b3942ce38cab248cb4113652f134fa4742850567.css" integrity="sha384-MdZhLS438wGsAU9blyb/GqY8LX5QY9RAAWuSVLOULOOMqySMtBE2UvE0&#43;kdChQVn"><body>
+<meta name="supported-color-schemes" content="light dark"><title>Centos8 安装 MySQL8 记录&nbsp;&ndash;&nbsp;Physalis</title><link rel="stylesheet" href="/css/core.min.94f6302fafea9677c877d76d9c34d2a6bc6aa7d2ec97853b286c1ddddfc4f0dd5093d3de74afb1a74a7d668ea4fcfe16.css" integrity="sha384-lPYwL6/qlnfId9dtnDTSprxqp9Lsl4U7KGwd3d/E8N1Qk9PedK&#43;xp0p9Zo6k/P4W"><body>
     <div class="base-body"><section id="header" class="site header">
     <div class="header wrap"><span class="header left-side"><a class="site home" href="/"><span class="site name">Physalis</span></a></span>
         <span class="header right-side"><div class="nav wrap"><nav class="nav"><a class="nav item" href="/categories/">Categories</a><a class="nav item" href="/tags/">Tags</a><a class="nav item" href="/about">About</a></nav></div></span></div><div class="site slogan"><span class="title">The faintest ink is better than the best memory. </span></div></section><div id="content"><div class="article-container"><section class="article header">
@@ -41,7 +41,7 @@ mysql-community-common-8.0.19-1.el8.x86_64.rpm  <span class="c1">#只需安装�
 &gt; yum install gcc-c++
 &gt; yum install gdb
 </code></pre></div><p>rpm 软件包是已经编译好的安装包，直接使用 <code>rpm</code> 命令就可以安装：<a href="https://man.linuxde.net/rpm"target="_blank">关于rpm命令的说明</a></p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1">#因为有依赖问题所以要保持安装顺序，具体命令如下</span>
+<div class="highlight"><pre class="chroma"><code class="language-Bash" data-lang="Bash"><span class="c1">#因为有依赖问题所以要保持安装顺序，具体命令如下</span>
 &gt; rpm -ivh mysql-community-common-8.0.19-1.el8.x86_64.rpm 
 &gt; rpm -ivh mysql-community-libs-8.0.19-1.el8.x86_64.rpm 
 &gt; rpm -ivh mysql-community-client-8.0.19-1.el8.x86_64.rpm 
@@ -69,34 +69,34 @@ mysql-community-client-8.0.19-1.el8.x86_64
 </code></pre></div><p>连接到 mysql 后需要先修改密码才能进行其他操作，因为有密码验证机制，太简单的密码是不能设置的。
 因为为了方便测试，这里通过修改 系统变量来更改密码策略。（如果跳过这里，密码必须包含大小写字母，数字，特殊字符才可以设置成功。）</p>
 <p>下面是在 mysql 中进行的操作：</p>
-<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="c1"># 设置最小密码长度
-</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="kt">SET</span> <span class="n">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
-<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">#</span> <span class="err">设置最小密码长度</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SET</span> <span class="k">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="k">length</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
 
-<span class="c1"># 设置密码策略级别为 low 默认的为 medium
-</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="kt">SET</span> <span class="n">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">policy</span><span class="o">=</span><span class="s1">&#39;low&#39;</span><span class="p">;</span>
-<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">设置密码策略级别为</span> <span class="n">low</span> <span class="err">默认的为</span> <span class="n">medium</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SET</span> <span class="k">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">policy</span><span class="o">=</span><span class="s1">&#39;low&#39;</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
 
-<span class="c1"># 最后重设密码
-</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">ALTER</span> <span class="k">USER</span> <span class="s1">&#39;root&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span> <span class="k">identified</span> <span class="k">by</span> <span class="s1">&#39;202003&#39;</span><span class="p">;</span>
-<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">最后重设密码</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">ALTER</span> <span class="k">USER</span> <span class="s1">&#39;root&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span> <span class="n">identified</span> <span class="k">by</span> <span class="s1">&#39;202003&#39;</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="k">rows</span> <span class="n">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
 
-<span class="c1"># 还可以评估下自己密码强度 1~100
-</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">);</span>
-<span class="o">+--------------------------------------+</span>
-<span class="o">|</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">)</span> <span class="o">|</span>
-<span class="o">+--------------------------------------+</span>
-<span class="o">|</span>                                   <span class="mi">50</span> <span class="o">|</span>
-<span class="o">+--------------------------------------+</span>
-<span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+<span class="o">#</span> <span class="err">还可以评估下自己密码强度</span> <span class="mi">1</span><span class="o">~</span><span class="mi">100</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">);</span>
+<span class="o">+</span><span class="c1">--------------------------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">--------------------------------------+
+</span><span class="c1"></span><span class="o">|</span>                                   <span class="mi">50</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">--------------------------------------+
+</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
 
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">);</span>
-<span class="o">+-------------------------------------------+</span>
-<span class="o">|</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">)</span> <span class="o">|</span>
-<span class="o">+-------------------------------------------+</span>
-<span class="o">|</span>                                       <span class="mi">100</span> <span class="o">|</span>
-<span class="o">+-------------------------------------------+</span>
-<span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="n">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">);</span>
+<span class="o">+</span><span class="c1">-------------------------------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">-------------------------------------------+
+</span><span class="c1"></span><span class="o">|</span>                                       <span class="mi">100</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">-------------------------------------------+
+</span><span class="c1"></span><span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
 </code></pre></div><p>以上就算配置成功了，可以照着其他教程玩耍了，下面是一些额外的记录。</p>
 <h2 id="其他">其他</h2>
 <p>Linux 下 MySQL 8 的用户配置文件为 <code>/etc/my.cnf</code></p>
@@ -113,37 +113,37 @@ mysql-community-client-8.0.19-1.el8.x86_64
 <li><code>/usr/bin</code> 命令目录 ，<code>mysqladmin</code>, <code>mysqldump</code>等。</li>
 </ul>
 <p>默认字符配置</p>
-<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">&gt;</span> <span class="k">show</span> <span class="n">variables</span> <span class="k">like</span> <span class="s1">&#39;%char%&#39;</span><span class="p">;</span>
-<span class="o">+--------------------------------------+--------------------------------+</span>
-<span class="o">|</span> <span class="n">Variable_name</span>                        <span class="o">|</span> <span class="n">Value</span>                          <span class="o">|</span>
-<span class="o">+--------------------------------------+--------------------------------+</span>
-<span class="o">|</span> <span class="n">character_set_client</span>                 <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<div class="highlight"><pre class="chroma"><code class="language-sql" data-lang="sql"><span class="o">&gt;</span> <span class="k">show</span> <span class="n">variables</span> <span class="k">like</span> <span class="s1">&#39;%char%&#39;</span><span class="p">;</span>
+<span class="o">+</span><span class="c1">--------------------------------------+--------------------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">Variable_name</span>                        <span class="o">|</span> <span class="n">Value</span>                          <span class="o">|</span>
+<span class="o">+</span><span class="c1">--------------------------------------+--------------------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">character_set_client</span>                 <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
 <span class="o">|</span> <span class="n">character_set_connection</span>             <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
 <span class="o">|</span> <span class="n">character_set_database</span>               <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
-<span class="o">|</span> <span class="n">character_set_filesystem</span>             <span class="o">|</span> <span class="k">binary</span>                         <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_filesystem</span>             <span class="o">|</span> <span class="nb">binary</span>                         <span class="o">|</span>
 <span class="o">|</span> <span class="n">character_set_results</span>                <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
 <span class="o">|</span> <span class="n">character_set_server</span>                 <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
 <span class="o">|</span> <span class="n">character_set_system</span>                 <span class="o">|</span> <span class="n">utf8</span>                           <span class="o">|</span>
-<span class="o">|</span> <span class="n">character_sets_dir</span>                   <span class="o">|</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="mi">8</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="n">charsets</span><span class="o">/</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_sets_dir</span>                   <span class="o">|</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="k">share</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="mi">8</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="n">charsets</span><span class="o">/</span> <span class="o">|</span>
 <span class="o">|</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">special_char_count</span> <span class="o">|</span> <span class="mi">1</span>                              <span class="o">|</span>
-<span class="o">+--------------------------------------+--------------------------------+</span>
-
+<span class="o">+</span><span class="c1">--------------------------------------+--------------------------------+
+</span><span class="c1"></span>
 <span class="o">&gt;</span> <span class="k">show</span> <span class="n">variables</span> <span class="k">like</span> <span class="s1">&#39;%collation%&#39;</span><span class="p">;</span>
-<span class="o">+-------------------------------+--------------------+</span>
-<span class="o">|</span> <span class="n">Variable_name</span>                 <span class="o">|</span> <span class="n">Value</span>              <span class="o">|</span>
-<span class="o">+-------------------------------+--------------------+</span>
-<span class="o">|</span> <span class="n">collation_connection</span>          <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">-------------------------------+--------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">Variable_name</span>                 <span class="o">|</span> <span class="n">Value</span>              <span class="o">|</span>
+<span class="o">+</span><span class="c1">-------------------------------+--------------------+
+</span><span class="c1"></span><span class="o">|</span> <span class="n">collation_connection</span>          <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
 <span class="o">|</span> <span class="n">collation_database</span>            <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
 <span class="o">|</span> <span class="n">collation_server</span>              <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
 <span class="o">|</span> <span class="n">default_collation_for_utf8mb4</span> <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
-<span class="o">+-------------------------------+--------------------+</span>
-
-<span class="c1"># 注意后面的 ai_ci, 
-</span><span class="c1"># i 是指 insensitive,
-</span><span class="c1"># ai 是指 accent insensitive,
-</span><span class="c1"># ci 是指 case insensitive，
-</span><span class="c1"># 也就是说默认的字符集校验不区分大小写。
-</span></code></pre></div><p>MySQL 8 现在默认字符编码为 <code>utf8mb4</code>，<code>utf8mb4</code> 字符集是 <code>UTF-8</code> 字符集在 <code>MySQL</code> 的对应版本，每个字符最多用 4个字节 表示，支持 emoji 😃 表情，而 <code>utf8</code> 字符集是 <code>MySQL</code> 中 <code>UTF-8</code> 的残缺版，每个字符最多用 3个字节 表示，虽然够日常使用但不支持 emoji 💩.</p>
+<span class="o">+</span><span class="c1">-------------------------------+--------------------+
+</span><span class="c1"></span>
+<span class="o">#</span> <span class="err">注意后面的</span> <span class="n">ai_ci</span><span class="p">,</span> 
+<span class="o">#</span> <span class="n">i</span> <span class="err">是指</span> <span class="k">insensitive</span><span class="p">,</span>
+<span class="o">#</span> <span class="n">ai</span> <span class="err">是指</span> <span class="n">accent</span> <span class="k">insensitive</span><span class="p">,</span>
+<span class="o">#</span> <span class="n">ci</span> <span class="err">是指</span> <span class="k">case</span> <span class="k">insensitive</span><span class="err">，</span>
+<span class="o">#</span> <span class="err">也就是说默认的字符集校验不区分大小写。</span>
+</code></pre></div><p>MySQL 8 现在默认字符编码为 <code>utf8mb4</code>，<code>utf8mb4</code> 字符集是 <code>UTF-8</code> 字符集在 <code>MySQL</code> 的对应版本，每个字符最多用 4个字节 表示，支持 emoji 😃 表情，而 <code>utf8</code> 字符集是 <code>MySQL</code> 中 <code>UTF-8</code> 的残缺版，每个字符最多用 3个字节 表示，虽然够日常使用但不支持 emoji 💩.</p>
 <p>如果要修改为 <code>utf8</code> ，则要在用户配置文件中添加如下设置。（现在各个教学视频在数据库刚安装完，版本一般为5.5 ，都是先将字符修改为 <code>utf8</code>.)</p>
 <div class="highlight"><pre class="chroma"><code class="language-ini" data-lang="ini"><span class="c1"># user settings</span>
 <span class="k">[mysqld]</span>
