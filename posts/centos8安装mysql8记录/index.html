@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><meta charset="utf-8"><meta name="generator" content="Hugo 0.66.0" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark"><title>Centos8 安装 MySQL8 记录&nbsp;&ndash;&nbsp;Physalis</title><link rel="stylesheet" href="/css/core.min.31d6612d2e37f301ac014f5b9726ff1aa63c2d7e5063d440016b9254b3942ce38cab248cb4113652f134fa4742850567.css" integrity="sha384-MdZhLS438wGsAU9blyb/GqY8LX5QY9RAAWuSVLOULOOMqySMtBE2UvE0&#43;kdChQVn"><body>
+    <div class="base-body"><section id="header" class="site header">
+    <div class="header wrap"><span class="header left-side"><a class="site home" href="/"><span class="site name">Physalis</span></a></span>
+        <span class="header right-side"><div class="nav wrap"><nav class="nav"><a class="nav item" href="/categories/">Categories</a><a class="nav item" href="/tags/">Tags</a><a class="nav item" href="/about">About</a></nav></div></span></div><div class="site slogan"><span class="title">The faintest ink is better than the best memory. </span></div></section><div id="content"><div class="article-container"><section class="article header">
+    <h1 class="article title">Centos8 安装 MySQL8 记录</h1><p class="article date">Saturday, March 7, 2020</p></section><article class="article markdown-body"><p>Centos 8 是 2019-9 新发布的，MySQL 8 是 2018-4 发布的，这里都是从官网下的最新版。</p>
+<p>Centos 安装在 VMware 15 WorkStation free 版的虚拟机上。下面是安装过程的踩坑记录，全部使用 root 用户操作。</p>
+<h2 id="下载-mysql">下载 MySQL</h2>
+<p>这里下载的是 rpm 包，没有用 yum 安装，因为看资料说：</p>
+<blockquote>
+<p>从CentOS 7开始，MariaDB成为Yum源中默认的数据库安装包。也就是说在CentOS 7及以上的系统中使用yum安装MySQL默认安装的会是MariaDB（MySQL的一个分支）。如果想安装官方MySQL版本，需要使用MySQL提供的Yum源。</p>
+</blockquote>
+<p>而我折腾了一番后，没能成功添加好源（可能？因为添加完源之后安装时 yum 提醒我找不到匹配项）🙄。</p>
+<p>这里是下载<a href="https://dev.mysql.com/downloads/mysql/"target="_blank">官网地址</a>，注意选择操作系统（ Select Operating System ）时选择的是 <u>Red Hat Enterprise Linux</u> ，然后直接下载 bundle 包就好，里面除了 mysql-server，mysql-client 以外还有很多其他包，我们只需要其中四个。（如果不想这么做，在官网下载页面 Select OS Version 选项里选择具体 OS 版本后有各个单独包的下载。 ）</p>
+<p>这里直接使用 <code>wget</code>命令下载</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&gt; wget https://dev.mysql.com/get/Downloads/mysql-8.0.19-1.el8.x86_64.rpm-bundle.tar
+</code></pre></div><p>下载完成后直接用 <code>tar</code> 命令解压: <a href="https://man.linuxde.net/tar"target="_blank">关于tar命令的说明</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1">#解压 下载包</span>
+&gt; tar -ixvf mysql-8.0.19-1.el8.x86_64.rpm-bundle.tar 
+<span class="c1"># 得到如下</span>
+mysql-community-devel-8.0.19-1.el8.x86_64.rpm
+mysql-community-debugsource-8.0.19-1.el8.x86_64.rpm
+mysql-community-server-debug-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-server-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-server-debug-8.0.19-1.el8.x86_64.rpm
+mysql-community-libs-8.0.19-1.el8.x86_64.rpm   <span class="c1">#只需安装这四个即可（2/4）</span>
+mysql-community-client-8.0.19-1.el8.x86_64.rpm <span class="c1">#只需安装这四个即可（3/4）</span>
+mysql-community-client-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-server-8.0.19-1.el8.x86_64.rpm  <span class="c1">#只需安装这四个即可（4/4）</span>
+mysql-community-test-8.0.19-1.el8.x86_64.rpm
+mysql-community-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-test-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-libs-debuginfo-8.0.19-1.el8.x86_64.rpm
+mysql-community-common-8.0.19-1.el8.x86_64.rpm  <span class="c1">#只需安装这四个即可（1/4）</span>
+</code></pre></div><h2 id="安装">安装</h2>
+<p>在安装之前要先确保系统已经安装了 <code>gcc</code>，如果是新装的系统，是没有 <code>gcc</code> 的，这里是可以直接用 <code>yum</code>安装的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># 分别执行下述命令</span>
+&gt; yum install gcc
+&gt; yum install gcc-c++
+&gt; yum install gdb
+</code></pre></div><p>rpm 软件包是已经编译好的安装包，直接使用 <code>rpm</code> 命令就可以安装：<a href="https://man.linuxde.net/rpm"target="_blank">关于rpm命令的说明</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1">#因为有依赖问题所以要保持安装顺序，具体命令如下</span>
+&gt; rpm -ivh mysql-community-common-8.0.19-1.el8.x86_64.rpm 
+&gt; rpm -ivh mysql-community-libs-8.0.19-1.el8.x86_64.rpm 
+&gt; rpm -ivh mysql-community-client-8.0.19-1.el8.x86_64.rpm 
+&gt; rpm -ivh mysql-community-server-8.0.19-1.el8.x86_64.rpm
+
+<span class="c1">#安装完成后可以通过如下命令查看是否安装成功</span>
+&gt; rpm -qa<span class="p">|</span>grep mysql
+mysql-community-server-8.0.19-1.el8.x86_64
+mysql-community-common-8.0.19-1.el8.x86_64
+mysql-community-libs-8.0.19-1.el8.x86_64
+mysql-community-client-8.0.19-1.el8.x86_64
+</code></pre></div><h2 id="配置-mysql">配置 MySQL</h2>
+<p>首先开启 MSQL 服务，这里用 <code>systemctl</code> 命令，而 Centos 6 版本使用 <code>service</code> 命令，具体参数也有差异：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 启动/查看/关闭/重启 MySql 服务</span>
+&gt; systemctl start/status/stop/restart mysqld.service
+<span class="c1">## centos 6,5 的命令</span>
+&gt; service mysqld start/status/stop/restart
+</code></pre></div><p>MySQL 服务在第一次启动后会创建一个 <code>root@localhost</code> 用户，初始密码存放在 <code>/var/log/mysqld.log</code> 中</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 查看初始密码</span>
+&gt; grep <span class="s1">&#39;temporary password&#39;</span> /var/log/mysqld.log
+2020-03-05T03:42:34.932877Z <span class="m">5</span> <span class="o">[</span>Note<span class="o">]</span> <span class="o">[</span>MY-010454<span class="o">]</span> <span class="o">[</span>Server<span class="o">]</span> A temporary password is generated <span class="k">for</span> root@localhost: %g:vT&gt;?ef3Ht
+
+<span class="c1"># 利用初始密码登录</span>
+&gt; mysql -u root -p%g:vT&gt;?ef3Ht
+</code></pre></div><p>连接到 mysql 后需要先修改密码才能进行其他操作，因为有密码验证机制，太简单的密码是不能设置的。
+因为为了方便测试，这里通过修改 系统变量来更改密码策略。（如果跳过这里，密码必须包含大小写字母，数字，特殊字符才可以设置成功。）</p>
+<p>下面是在 mysql 中进行的操作：</p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="c1"># 设置最小密码长度
+</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="kt">SET</span> <span class="n">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+
+<span class="c1"># 设置密码策略级别为 low 默认的为 medium
+</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="kt">SET</span> <span class="n">GLOBAL</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">policy</span><span class="o">=</span><span class="s1">&#39;low&#39;</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+
+<span class="c1"># 最后重设密码
+</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">ALTER</span> <span class="k">USER</span> <span class="s1">&#39;root&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span> <span class="k">identified</span> <span class="k">by</span> <span class="s1">&#39;202003&#39;</span><span class="p">;</span>
+<span class="n">Query</span> <span class="n">OK</span><span class="p">,</span> <span class="mi">0</span> <span class="n">rows</span> <span class="nf">affected</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+
+<span class="c1"># 还可以评估下自己密码强度 1~100
+</span><span class="c1"></span><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">);</span>
+<span class="o">+--------------------------------------+</span>
+<span class="o">|</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;202003&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="o">+--------------------------------------+</span>
+<span class="o">|</span>                                   <span class="mi">50</span> <span class="o">|</span>
+<span class="o">+--------------------------------------+</span>
+<span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">01</span> <span class="n">sec</span><span class="p">)</span>
+
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SELECT</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">);</span>
+<span class="o">+-------------------------------------------+</span>
+<span class="o">|</span> <span class="nf">validate_password_strength</span><span class="p">(</span><span class="s1">&#39;23weQ!78dhk&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="o">+-------------------------------------------+</span>
+<span class="o">|</span>                                       <span class="mi">100</span> <span class="o">|</span>
+<span class="o">+-------------------------------------------+</span>
+<span class="mi">1</span> <span class="n">row</span> <span class="k">in</span> <span class="kt">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
+</code></pre></div><p>以上就算配置成功了，可以照着其他教程玩耍了，下面是一些额外的记录。</p>
+<h2 id="其他">其他</h2>
+<p>Linux 下 MySQL 8 的用户配置文件为 <code>/etc/my.cnf</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-ini" data-lang="ini"><span class="c1"># 初始的全部默认内容</span>
+<span class="k">[mysqld]</span>
+<span class="na">datadir</span><span class="o">=</span><span class="s">/var/lib/mysql</span>
+<span class="na">socket</span><span class="o">=</span><span class="s">/var/lib/mysql/mysql.sock</span>
+<span class="na">log-error</span><span class="o">=</span><span class="s">/var/log/mysqld.log</span>
+<span class="na">pid-file</span><span class="o">=</span><span class="s">/var/run/mysqld/mysqld.pid</span>
+</code></pre></div><p>核心目录：</p>
+<ul>
+<li><code>/var/lib/mysql</code>  数据库目录；</li>
+<li><code>/usr/share/mysql-8.0</code> 配置文件目录；</li>
+<li><code>/usr/bin</code> 命令目录 ，<code>mysqladmin</code>, <code>mysqldump</code>等。</li>
+</ul>
+<p>默认字符配置</p>
+<div class="highlight"><pre class="chroma"><code class="language-mysql" data-lang="mysql"><span class="o">&gt;</span> <span class="k">show</span> <span class="n">variables</span> <span class="k">like</span> <span class="s1">&#39;%char%&#39;</span><span class="p">;</span>
+<span class="o">+--------------------------------------+--------------------------------+</span>
+<span class="o">|</span> <span class="n">Variable_name</span>                        <span class="o">|</span> <span class="n">Value</span>                          <span class="o">|</span>
+<span class="o">+--------------------------------------+--------------------------------+</span>
+<span class="o">|</span> <span class="n">character_set_client</span>                 <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_connection</span>             <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_database</span>               <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_filesystem</span>             <span class="o">|</span> <span class="k">binary</span>                         <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_results</span>                <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_server</span>                 <span class="o">|</span> <span class="n">utf8mb4</span>                        <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_set_system</span>                 <span class="o">|</span> <span class="n">utf8</span>                           <span class="o">|</span>
+<span class="o">|</span> <span class="n">character_sets_dir</span>                   <span class="o">|</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="mi">8</span><span class="p">.</span><span class="mi">0</span><span class="o">/</span><span class="n">charsets</span><span class="o">/</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">validate_password</span><span class="p">.</span><span class="n">special_char_count</span> <span class="o">|</span> <span class="mi">1</span>                              <span class="o">|</span>
+<span class="o">+--------------------------------------+--------------------------------+</span>
+
+<span class="o">&gt;</span> <span class="k">show</span> <span class="n">variables</span> <span class="k">like</span> <span class="s1">&#39;%collation%&#39;</span><span class="p">;</span>
+<span class="o">+-------------------------------+--------------------+</span>
+<span class="o">|</span> <span class="n">Variable_name</span>                 <span class="o">|</span> <span class="n">Value</span>              <span class="o">|</span>
+<span class="o">+-------------------------------+--------------------+</span>
+<span class="o">|</span> <span class="n">collation_connection</span>          <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">collation_database</span>            <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">collation_server</span>              <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
+<span class="o">|</span> <span class="n">default_collation_for_utf8mb4</span> <span class="o">|</span> <span class="n">utf8mb4_0900_ai_ci</span> <span class="o">|</span>
+<span class="o">+-------------------------------+--------------------+</span>
+
+<span class="c1"># 注意后面的 ai_ci, 
+</span><span class="c1"># i 是指 insensitive,
+</span><span class="c1"># ai 是指 accent insensitive,
+</span><span class="c1"># ci 是指 case insensitive，
+</span><span class="c1"># 也就是说默认的字符集校验不区分大小写。
+</span></code></pre></div><p>MySQL 8 现在默认字符编码为 <code>utf8mb4</code>，<code>utf8mb4</code> 字符集是 <code>UTF-8</code> 字符集在 <code>MySQL</code> 的对应版本，每个字符最多用 4个字节 表示，支持 emoji 😃 表情，而 <code>utf8</code> 字符集是 <code>MySQL</code> 中 <code>UTF-8</code> 的残缺版，每个字符最多用 3个字节 表示，虽然够日常使用但不支持 emoji 💩.</p>
+<p>如果要修改为 <code>utf8</code> ，则要在用户配置文件中添加如下设置。（现在各个教学视频在数据库刚安装完，版本一般为5.5 ，都是先将字符修改为 <code>utf8</code>.)</p>
+<div class="highlight"><pre class="chroma"><code class="language-ini" data-lang="ini"><span class="c1"># user settings</span>
+<span class="k">[mysqld]</span>
+<span class="na">character-set-server</span><span class="o">=</span><span class="s">utf8</span>
+<span class="na">collation-server</span><span class="o">=</span><span class="s">utf8_general_ci</span>
+
+<span class="k">[mysql]</span>
+<span class="na">default-character-set</span><span class="o">=</span><span class="s">utf8</span>
+
+<span class="k">[client]</span>
+<span class="na">default-character-set</span><span class="o">=</span><span class="s">utf8</span>
+</code></pre></div><p>参考了以下文章：</p>
+<ul>
+<li><a href="https://blog.csdn.net/w05980598/article/details/79080381"target="_blank">mysql字符集 utf8 和utf8mb4 的区别</a></li>
+<li><a href="http://mysqlserverteam.com/mysql-8-0-1-accent-and-case-sensitive-collations-for-utf8mb4/"target="_blank">mysql8 字符排序</a></li>
+<li><a href="https://www.techug.com/post/in-mysql-never-use-utf8-use-utf8mb4.html"target="_blank">mysql中的utf8mb4</a></li>
+<li><a href="https://juejin.im/post/5d07cf13f265da1bd522cfb6#heading-17"target="_blank">CentOS安装MySQL详解</a></li>
+</ul></article><section class="article labels"><a class="category" href=/categories/linux/>Linux</a><a class="category" href=/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/>数据库</a><a class="tag" href=/tags/mysql/>MySQL</a><a class="tag" href=/tags/centos/>CentOS</a></section></div></div><section id="footer" class="footer"><div class="footer-wrap">
+    <p class="copyright">Physalis</p>
+    <p class="powerby"><span>Powered by </span><a href="https://gohugo.io" 
+        target="_blank">Hugo</a><span> and the </span><a href="https://themes.gohugo.io/hugo-notepadium/" 
+        target="_blank">Notepadium</a></p>
+</div></section><script src="/js/prism.min.28f2bfd6dfaa7ad0e8b973373bb7db234d27a2faafc26d5ffd2de4c2b1b5f2bf80011f2e2976dc9fb364abb13f63ebdc.js" integrity="sha384-KPK/1t&#43;qetDouXM3O7fbI00novqvwm1f/S3kwrG18r&#43;AAR8uKXbcn7Nkq7E/Y&#43;vc"></script></div>
+</body>
+
+</html>
