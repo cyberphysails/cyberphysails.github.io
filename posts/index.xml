@@ -6,17 +6,17 @@
     <description>Recent content in Posts on Physalis</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 12 Mar 2020 20:40:49 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 13 Mar 2020 17:09:23 +0800</lastBuildDate>
     
         <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>运行级别 runlevels 与 targets 的比较，在CentOS8中找回丢失的root密码</title>
-      <link>/posts/runlevels/</link>
-      <pubDate>Thu, 12 Mar 2020 20:40:49 +0800</pubDate>
+      <title>RunlevelANDtarget</title>
+      <link>/posts/runlevelandtarget/</link>
+      <pubDate>Fri, 13 Mar 2020 17:09:23 +0800</pubDate>
       
-      <guid>/posts/runlevels/</guid>
+      <guid>/posts/runlevelandtarget/</guid>
       <description>&lt;p&gt;在以往的 CentOS6 中，用户可以通过单用户模式来重置root密码，但在 CentOS7 之后这一方法变的不再可行，本文提供了其他解决方案。&lt;/p&gt;</description>
       
     </item>
