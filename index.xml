@@ -12,22 +12,22 @@
     
     
     <item>
+      <title>Posts</title>
+      <link>/posts/</link>
+      <pubDate>Thu, 12 Mar 2020 20:40:49 +0800</pubDate>
+      
+      <guid>/posts/</guid>
+      <description></description>
+      
+    </item>
+    
+    <item>
       <title>About</title>
       <link>/about/</link>
       <pubDate>Mon, 09 Mar 2020 12:06:13 +0800</pubDate>
       
       <guid>/about/</guid>
       <description>The faintest ink is better than the best memory. 一个强迫自己记笔记的博客。 还在摸索怎么用 Hugo。 主题来自Notepadium.</description>
-      
-    </item>
-    
-    <item>
-      <title>Posts</title>
-      <link>/posts/</link>
-      <pubDate>Sat, 07 Mar 2020 13:04:46 +0800</pubDate>
-      
-      <guid>/posts/</guid>
-      <description></description>
       
     </item>
     
