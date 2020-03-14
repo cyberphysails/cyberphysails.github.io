@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en"><meta charset="utf-8"><meta name="generator" content="Hugo 0.66.0" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark"><title>CentOS中的运行级别与 targets比较，以及如何在CentOS8找回丢失的 root 密码&nbsp;&ndash;&nbsp;Physalis</title><link rel="stylesheet" href="/css/core.min.94f6302fafea9677c877d76d9c34d2a6bc6aa7d2ec97853b286c1ddddfc4f0dd5093d3de74afb1a74a7d668ea4fcfe16.css" integrity="sha384-lPYwL6/qlnfId9dtnDTSprxqp9Lsl4U7KGwd3d/E8N1Qk9PedK&#43;xp0p9Zo6k/P4W"><body>
+    <div class="base-body"><section id="header" class="site header">
+    <div class="header wrap"><span class="header left-side"><a class="site home" href="/"><span class="site name">Physalis</span></a></span>
+        <span class="header right-side"><div class="nav wrap"><nav class="nav"><a class="nav item" href="/categories/">Categories</a><a class="nav item" href="/tags/">Tags</a><a class="nav item" href="/about">About</a></nav></div></span></div><div class="site slogan"><span class="title">The faintest ink is better than the best memory. </span></div></section><div id="content"><div class="article-container"><section class="article header">
+    <h1 class="article title">CentOS中的运行级别与 targets比较，以及如何在CentOS8找回丢失的 root 密码</h1><p class="article date">Friday, March 13, 2020</p></section><article class="article markdown-body"><p>在以往的 CentOS6 中，用户可以通过单用户模式来重置root密码，但在 CentOS7 之后这一方法变的不再可行，本文提供了其他解决方案。</p>
+<h2 id="运行级别-runlevels-与-targets">运行级别 runlevels 与 targets</h2>
+<p>在 CentOS 6 中，用户可以使用 <code>init</code> 命令来改变系统运行级别，如</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 进入 runlevel 3 多用户有网络服务</span>
+&gt; init <span class="m">3</span>
+</code></pre></div><p>同时在 <code>/etc/inittab</code> 中可以进行运行级别相关配置，而在 CentOS 7,8 中 运行级别 runlevels 功能已经停用，改成了 targets 设置。再次尝试打开 <code>/etc/inittab</code>  会有如下信息，提醒用户使用替代的 targets , 并给出了简单的设置方法：（添加了一点翻译）</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># inittab is no longer used.</span>
+# 
+<span class="c1"># ADDING CONFIGURATION HERE WILL HAVE NO EFFECT ON YOUR SYSTEM.</span>
+#
+<span class="c1"># Ctrl-Alt-Delete is handled by /usr/lib/systemd/system/ctrl-alt-del.target</span>
+#
+<span class="c1"># systemd uses &#39;targets&#39; instead of runlevels. By default, there are two main targets:</span>
+#
+<span class="c1"># multi-user.target: analogous to runlevel 3</span>
+<span class="c1"># multi-user.target 类似于运行级别 3</span>
+<span class="c1"># graphical.target: analogous to runlevel 5</span>
+<span class="c1"># graphical.target 类似于运行级别 5</span>
+#
+<span class="c1"># To view current default target, run:</span>
+<span class="c1"># 查看系统当前默认 target</span>
+<span class="c1"># systemctl get-default</span>
+#
+<span class="c1"># To set a default target, run:</span>
+<span class="c1"># 设置系统的默认 target</span>
+<span class="c1"># systemctl set-default TARGET.target</span>
+</code></pre></div><p>需要注意的是，在设置完 <code>default.target</code> 后并不会立即改变当前的 <code>target</code>，而是在重启后生效。
+如果想不经重启立即改变当前的 <code>target</code> ，需要使用如下命令：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 立即切换到默认的 target</span>
+systemctl isolate default.target
+<span class="c1"># 或者立即切换到其它指定的 target，比如 multi-user.target</span>
+systemctl isolate multi-user.target
+</code></pre></div><h2 id="两者之间的比较">两者之间的比较</h2>
+<p>虽然相对更简单的 <code>multi-user.target</code> 与 <code>graphical.target</code> 取代了 <code>runlevels</code>  的设置，但在 CentOS 7，8 中依然保留了一些与更改前的运行级别相对应的 targets ，下面是 <code>runlevels</code> 与 部分 <code>target</code> 的比较：</p>
+<table>
+<thead>
+<tr>
+<th>Run Level</th>
+<th>Target Units</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>runlevel0.target, poweroff.target</td>
+<td>关机</td>
+</tr>
+<tr>
+<td>1</td>
+<td>runlevel1.target, rescue.target</td>
+<td>类似单用户模式（ a rescue shell ）</td>
+</tr>
+<tr>
+<td>2,3,4</td>
+<td>runlevel[234].target, multi- user.target</td>
+<td>命令行多用户模式</td>
+</tr>
+<tr>
+<td>5</td>
+<td>runlevel5.target, graphical.target</td>
+<td>图形界面多用户模式</td>
+</tr>
+<tr>
+<td>6</td>
+<td>runlevel6.target, reboot.target</td>
+<td>重启</td>
+</tr>
+</tbody>
+</table>
+<p>除了表格中的 <code>rescue.target</code> 以外，CentOS 7，8 还提供了一个 <code>emergency.target</code>, 官方的说明为：</p>
+<blockquote>
+<p>Rescue mode provides a convenient single-user environment and allows you to repair your system in situations when it is unable to complete a normal booting process.</p>
+<p>Emergency mode provides the most minimal environment possible and allows you to repair your system even in situations when the system is unable to enter rescue mode.</p>
+</blockquote>
+<p>大致意思为：当系统不能正常启动时，用户可以通过进入 Rescue mode 来做一些系统修复工作，<strong>“Rescue mode provides 提供了便捷的单用户环境“</strong>，而如果用户连 Rescue mode 都不能进入，那么**”提供了可能的最小运行环境的 Emergency mode“ **  可以允许用户来对系统进行修复。</p>
+<p>但要注意的是，这里的 Rescue mode 与 Emergency mode 都不完全等同于 CentOS 6 及其之前系统中的 单用户模式（runlevel 1）。 在以往的设定中，无论是进入单用户模式还是在单用户模式中执行 root 命令（如更改 root 密码等），用户都是不需要提供 root 密码的，而新系统中进入  Rescue mode 与 Emergency mode 都是需要 root 密码的。这也就是说我们无法通过 Rescue mode 与 Emergency mode 来找回丢失的密码。（以往可以通过单用户模式来这么做。）</p>
+<p>除了 <code>rescue.target</code> 与 <code>emergency.target</code> 以外，还可以用 <code>find</code> 命令查看系统中其它的 <code>targets</code>:</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">&gt; find / -name <span class="s2">&#34;*.target&#34;</span>
+</code></pre></div><h2 id="找回丢失的-root-密码">找回丢失的 root 密码</h2>
+<p><strong>注意以下操作是我在 CentOS8 上进行的， 仅供参考，不保证完全无误。</strong></p>
+<p>首先从 GRUB 打断启动过程</p>
+<p><a target="_blank" rel="noopener noreferrer" 
+  href="https://s1.ax1x.com/2020/03/13/8uBC1x.png"><img  src="https://s1.ax1x.com/2020/03/13/8uBC1x.png"
+        alt="grub菜单"/></a></p>
+<p>在系统启动过程中，当看见 grub 启动菜单（如上）时按 <strong>e</strong> 键，进入内核启动参数修改界面（如下）；</p>
+<p><a target="_blank" rel="noopener noreferrer" 
+  href="https://s1.ax1x.com/2020/03/13/8ugFG4.png"><img  src="https://s1.ax1x.com/2020/03/13/8ugFG4.png"
+        alt="内核启动参数界面"/></a></p>
+<p>删除 以 <code>linux</code> 为开头的行中的 <code>ro</code> 参数，并在相同位置添加 <code>rd.break enforcing=0</code> , 然后按 <strong>CTRL + X</strong>  启动系统；</p>
+<p><a target="_blank" rel="noopener noreferrer" 
+  href="https://s1.ax1x.com/2020/03/13/8ugISJ.png"><img  src="https://s1.ax1x.com/2020/03/13/8ugISJ.png"
+        alt="修改启动参数"/></a></p>
+<p>之后就进入了一个 shell 中，</p>
+<p><a target="_blank" rel="noopener noreferrer" 
+  href="https://s1.ax1x.com/2020/03/13/8u4QFP.png"><img  src="https://s1.ax1x.com/2020/03/13/8u4QFP.png"
+        alt="shell"/></a></p>
+<p>此时根系统以只读 <code>ro</code> 方式挂载，而要想修改 root密码必须对根系统有读写权限，</p>
+<p>所以要再重新挂载根系统，命令如下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">switch_root&gt; mount -o remount,rw /sysroot
+</code></pre></div><p>然后切换到 <code>/sysroot</code> 目录下，重置 root 密码：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">switch_root&gt; chroot /sysroot
+sh&gt; passwd
+</code></pre></div><p>重置密码后，设置 SELinux relabeling ，然后退出 shell ：</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">sh&gt; touch /.autorelabel
+sh&gt; <span class="nb">exit</span>
+switch_root&gt; <span class="nb">exit</span>
+</code></pre></div><p>注意需要执行两次 <code>exit</code> ，然后系统会自动重启，等待即可。</p>
+<p>具体图示：</p>
+<p><a target="_blank" rel="noopener noreferrer" 
+  href="https://s1.ax1x.com/2020/03/13/8uIEbd.png"><img  src="https://s1.ax1x.com/2020/03/13/8uIEbd.png"
+        alt="重置密码"/></a></p>
+<p>参考文章：</p>
+<ul>
+<li><a href="https://www.thegeekdiary.com/rhel-centos-7-how-to-set-default-target-replaced-runlevel/"target="_blank">How to set default target (default runlevel)</a></li>
+<li><a href="https://computingforgeeks.com/how-to-reset-root-password-in-rhel-8/"target="_blank">How to reset root password in RHEL 8</a></li>
+<li><a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/system_administrators_guide/sec-terminal_menu_editing_during_boot#sec-Recovering_Root_Password"target="_blank">TERMINAL MENU EDITING DURING BOOT</a></li>
+<li><a href="https://linuxconfig.org/redhat-8-recover-root-password"target="_blank">RHEL 8 / CentOS 8 recover root password</a></li>
+<li><a href="https://www.golinuxcloud.com/boot-in-single-user-mode-rhel-centos-8-linux/#2_Boot_into_emergency_mode_emergencytarget"target="_blank">在CentOS7/8中进入单用户模式</a></li>
+</ul></article><section class="article labels"><a class="category" href=/categories/linux/>Linux</a><a class="tag" href=/tags/centos/>CentOS</a></section></div><section class="article navigation"><p><a class="link" href="/posts/centos8%E5%AE%89%E8%A3%85mysql8%E8%AE%B0%E5%BD%95/"><span class="li">&rarr;</span>Centos8 安装 MySQL8 记录</a></p></section><section class="article discussion"><div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "physails" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a></section></div><section id="footer" class="footer"><div class="footer-wrap">
+    <p class="copyright">Physalis</p>
+    <p class="powerby"><span>Powered by </span><a href="https://gohugo.io" 
+        target="_blank">Hugo</a><span> and the </span><a href="https://themes.gohugo.io/hugo-notepadium/" 
+        target="_blank">Notepadium</a></p>
+</div></section><script src="/js/prism.min.28f2bfd6dfaa7ad0e8b973373bb7db234d27a2faafc26d5ffd2de4c2b1b5f2bf80011f2e2976dc9fb364abb13f63ebdc.js" integrity="sha384-KPK/1t&#43;qetDouXM3O7fbI00novqvwm1f/S3kwrG18r&#43;AAR8uKXbcn7Nkq7E/Y&#43;vc"></script>
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-160648416-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+</div>
+</body>
+
+</html>
